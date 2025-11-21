@@ -10,7 +10,7 @@ def lose():
     for i in "YOU LOSE":
         print(i, end='')
         sleep(pause)
-    print('\033[0m')
+    input('\033[0m')
 
 def win():
     global gameRunning
@@ -21,7 +21,7 @@ def win():
     for i in "YOU WIN":
         print(i, end='')
         sleep(pause)
-    print('\033[0m')
+    input('\033[0m')
 
 def generate_folder(address, depth, seed, treasurecount):
     r.seed(seed)
@@ -188,10 +188,13 @@ def print_folder(node_or_list, breadcrumb=None):
     children = node.get('children', [])
 
     # header: use breadcrumb if provided, otherwise folder name
-    header = breadcrumb if breadcrumb is not None else name
+    if breadcrumb:
+        header = breadcrumb
+    else:
+        header = name
 
     print("\033[95mA list of commands:"
-          "\nread <filename>"
+          "\nread <filename> (or r <filename>)"
           "\ncd <foldername>\033[0m")
 
     print(f"\033[1;96m{header}\033[0m")
@@ -251,7 +254,7 @@ while gameRunning:
                         position.append(found_idx)
                     else:
                         print("\033[91mNot a folder.\033[0m")
-    elif action[0] == 'read' and len(action) > 1:
+    elif action[0] in ['read', 'r'] and len(action) > 1:
         open_file(action[1], position, player, world)
     else:
         print("\033[91mUnknown command. Try \"read readme.txt\".\033[0m\n\n")

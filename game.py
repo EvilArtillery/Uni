@@ -74,6 +74,41 @@ def traverse(address, path):
         return None
     return traverse(item['children'], path[1:])
 
+
+def get_node(address, path):
+    """Return the folder node (dict) for the given path.
+
+    For the root (empty path) return a synthetic node {'name': 'root', 'children': address}.
+    Returns None for invalid paths.
+    """
+    if not path:
+        return {'name': 'root', 'children': address}
+    idx = path[0]
+    if not isinstance(idx, int) or idx < 0 or idx >= len(address):
+        return None
+    item = address[idx]
+    if not isinstance(item, dict) or 'children' not in item:
+        return None
+    if len(path) == 1:
+        return item
+    return get_node(item['children'], path[1:])
+
+
+def get_breadcrumb(address, path):
+    if not path:
+        return 'C:/'
+    parts = []
+    cur = address
+    for idx in path:
+        if not isinstance(idx, int) or idx < 0 or idx >= len(cur):
+            return None
+        item = cur[idx]
+        if not isinstance(item, dict) or 'name' not in item or 'children' not in item:
+            return None
+        parts.append(item['name'])
+        cur = item['children']
+    return 'C:/' + '/'.join(parts) + '/'
+
 def open_file(filename, position, player, world):
     current_dir = traverse(world, position)
     if current_dir is None:
@@ -113,7 +148,7 @@ def open_file(filename, position, player, world):
     elif filename == 'atkbonus.txt':
         print("You found an attack bonus! Your attack increases by 1.")
         player['attack'] += 1
-        print(f"\033[94mCurrent attack: {player['attack']}\033[0m]")
+        print(f"\033[94mCurrent attack: {player['attack']}\033[0m")
     elif filename == 'monster.txt':
         if player['attack'] > r.randint(1,3):
             print("You encountered a monster and \033[92mdefeated it\033[0m!")
@@ -131,7 +166,7 @@ def open_file(filename, position, player, world):
         # best-effort: if deletion fails, ignore and continue
         pass
 
-    input("\n\nPress Enter to continue...")
+    input("Press Enter to continue...")
 
 def print_world(address, depth=0):
     for item in address:
@@ -143,18 +178,34 @@ def print_world(address, depth=0):
         else:
             print('  ' * depth + '- Unknown')
 
-def print_folder(address, depth=0):
-    # Print current directory contents: folders by name and files by filename
-    print("\n\n\n\n\n\n\n\n")
-    for item in address:
+def print_folder(node_or_list, breadcrumb=None):
+    if isinstance(node_or_list, list):
+        node = {'name': 'root', 'children': node_or_list}
+    else:
+        node = node_or_list
+
+    name = node.get('name', 'Folder')
+    children = node.get('children', [])
+
+    # header: use breadcrumb if provided, otherwise folder name
+    header = breadcrumb if breadcrumb is not None else name
+
+    print("\033[95mA list of commands:"
+          "\nread <filename>"
+          "\ncd <foldername>\033[0m")
+
+    print(f"\033[1;96m{header}\033[0m")
+
+    print("\033[1;93m..\033[0m")
+
+    # list children
+    for item in children:
         if isinstance(item, dict):
             print(item.get('name', 'Folder'))
         elif isinstance(item, str):
             print(item)
         else:
             print('Unknown')
-    if not address:
-        print("\033[93m<Empty Folder>\033[0m")
 
 player = {'health':3, 'attack':1, 'wincon':0}
 position = []  # path of indices from root to current folder
@@ -165,7 +216,14 @@ world = generate_world(int(seed))
 while gameRunning:
     # The rest of the game loop would go here, handling player actions and interactions with the generated world.
     # print_world(world) # For debugging: print the entire world structure
-    print_folder(traverse(world, position))
+    node = get_node(world, position)
+    if node is None:
+        print("\033[91mCurrent directory not found.\033[0m")
+    else:
+        breadcrumb = get_breadcrumb(world, position)
+        if breadcrumb is None:
+            breadcrumb = node.get('name', 'Folder')
+        print_folder(node, breadcrumb)
     action = list(input().split())
     if action[0] in ['q', 'quit']:
         lose()

@@ -51,7 +51,7 @@ def generate_folder(address, depth, seed, treasurecount):
 
 def generate_world(seed):
     # world is a list of items: file strings or folder dicts { 'name':..., 'children':[...] }
-    world = ['readme.txt']
+    world = []
     # initialize folder counter for unique names
     generate_folder.folder_counter = 1
     if generate_folder(world, 0, seed+1, 0) == 0:
@@ -59,10 +59,7 @@ def generate_world(seed):
     return world
 
 def traverse(address, path):
-    """Return the directory at `path`.
-    `path` is a list of indices leading from the root `address` to the
-    target directory. An empty list returns the top-level `address`.
-    Returns `None` if the path is invalid or doesn't point to a folder."""
+    # Return the directory at `path`.
     if not path:
         return address
     idx = path[0]
@@ -76,11 +73,9 @@ def traverse(address, path):
 
 
 def get_node(address, path):
-    """Return the folder node (dict) for the given path.
-
-    For the root (empty path) return a synthetic node {'name': 'root', 'children': address}.
-    Returns None for invalid paths.
-    """
+    # Return the folder node for the given path.
+    # For the root (empty path) return a synthetic node {'name': 'root', 'children': address}.
+    # Returns None for invalid paths.
     if not path:
         return {'name': 'root', 'children': address}
     idx = path[0]
@@ -132,10 +127,6 @@ def open_file(filename, position, player, world):
         print("\033[91mFile not found.\033[0m")
         return
 
-    if filename == 'readme.txt':
-        print("\033[92mWelcome to the game! Here's a basic tutorial you'll absolutely need to win.")
-        print("Navigate the file system using 'cd <foldername>' and read files using 'read <filename>'.")
-        print("Your goal is to find the treasure file. There's only one in the whole world, so good luck!\033[0m")
     elif filename == 'treasure.txt':
         print("\033[92mYou found a treasure!\033[0m")
         player['wincon'] = 1
@@ -214,7 +205,6 @@ seed = time()
 world = generate_world(int(seed))
 
 while gameRunning:
-    # The rest of the game loop would go here, handling player actions and interactions with the generated world.
     # print_world(world) # For debugging: print the entire world structure
     node = get_node(world, position)
     if node is None:
@@ -225,6 +215,12 @@ while gameRunning:
             breadcrumb = node.get('name', 'Folder')
         print_folder(node, breadcrumb)
     action = list(input().split())
+    if action == []:
+        if input("Need help?([y]/n) ") == 'n':
+            continue
+        else:
+            print("This is a game about searching the Linux file system for a treasure. The hint about how to move is written above in \033[95mviolet\033[0m.")
+            print("You have to find a treasure file. There's only one, so good luck!")
     if action[0] in ['q', 'quit']:
         lose()
     elif action[0] == 'cd' and len(action) > 1:

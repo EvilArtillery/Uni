@@ -176,22 +176,28 @@ def print_folder(node_or_list, breadcrumb=None):
 
     print("\033[95mA list of commands:"
           "\nread <filename> (or r <filename>)"
-          "\ncd <foldername>\033[0m")
+          "\ncd <foldername> (or cd ..)\033[0m")
 
     print(f"\033[1;96m{header}\033[0m")
+    # show parent entry as if it were a subfolder, but visually distinct
+    # at root, mark it disabled; otherwise show it in bright yellow
+    if header == 'C:/' or breadcrumb == 'C:/':
+        print('\033[90m- .. (root)\033[0m')
+    else:
+        print('\033[1;93m- ..\033[0m')
 
-    print("\033[1;93m..\033[0m")
-
-    # list children
+    # list children (show folders and files with a '- ' prefix)
     for item in children:
         if isinstance(item, dict):
-            if item['children'] == []:
-                print('\033[31m', end='')
-            print(item.get('name', 'Folder'), '\033[0m')
+            if item.get('children') == []:
+                color = '\033[31m'  # red for empty folders
+            else:
+                color = '\033[93m'  # yellow for folders
+            print(f"{color}- {item.get('name', 'Folder')}\033[0m")
         elif isinstance(item, str):
-            print(item)
+            print(f"- {item}")
         else:
-            print('Unknown')
+            print('- Unknown')
 
 player = {'health':3, 'attack':1, 'wincon':0}
 position = []  # path of indices from root to current folder

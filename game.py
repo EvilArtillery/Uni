@@ -211,11 +211,10 @@ while gameRunning:
         print_folder(node, breadcrumb)
     action = list(input().split())
     if action == []:
-        if input("Need help?([y]/n) ") == 'n':
-            continue
-        else:
+        if input("Need help?([y]/n) ") != 'n':
             print("This is a game about searching the Linux file system for a treasure. The hint about how to move is written above in \033[95mviolet\033[0m.")
             print("You have to find a treasure file. There's only one, so good luck!")
+        continue
     if action[0] in ['q', 'quit']:
         lose()
     elif action[0] == 'cd' and len(action) > 1:

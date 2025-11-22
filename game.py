@@ -4,23 +4,13 @@ import random as r
 def lose():
     global gameRunning
     gameRunning = 0
-    pause = 0.3
-    print('        \033[1;91m', end='')
-    sleep(pause)
-    for i in "YOU LOSE":
-        print(i, end='')
-        sleep(pause)
+    print('\033[1;91mYOU LOSE')
     input('\033[0m')
 
 def win():
     global gameRunning
     gameRunning = 0
-    pause = 0.3
-    print('        \033[1;92m', end='')
-    sleep(pause)
-    for i in "YOU WIN":
-        print(i, end='')
-        sleep(pause)
+    print('\033[1;92mYOU WIN')
     input('\033[0m')
 
 def generate_folder(address, depth, seed, treasurecount):
@@ -195,7 +185,9 @@ def print_folder(node_or_list, breadcrumb=None):
     # list children
     for item in children:
         if isinstance(item, dict):
-            print(item.get('name', 'Folder'))
+            if item['children'] == []:
+                print('\033[31m', end='')
+            print(item.get('name', 'Folder'), '\033[0m')
         elif isinstance(item, str):
             print(item)
         else:

@@ -218,7 +218,7 @@ while gameRunning:
     action = list(input().split())
     if action == []:
         if input("Need help?([y]/n) ") != 'n':
-            print("This is a game about searching the Linux file system for a treasure. The hint about how to move is written above in \033[95mviolet\033[0m.")
+            print("This is a game about searching the Linux file system for a treasure. The hints about how to move is written above in \033[95mviolet\033[0m.")
             print("You have to find a treasure file. There's only one, so good luck!")
         continue
     if action[0] in ['q', 'quit']:
@@ -250,7 +250,11 @@ while gameRunning:
     elif action[0] in ['read', 'r'] and len(action) > 1:
         open_file(action[1], position, player, world)
     else:
-        print("\033[91mUnknown command. Try \"read readme.txt\".\033[0m\n\n")
+        print("\033[91mUnknown command.\033[0m")
+        if input("Need help?([y]/n) ") != 'n':
+            print("This is a game about searching the Linux file system for a treasure. The hints about how to move is written above in \033[95mviolet\033[0m.")
+            print("You have to find a treasure file. There's only one, so good luck!")
+        continue
     if player['health'] <= 0:
         lose()
     if player['wincon'] == 1:
